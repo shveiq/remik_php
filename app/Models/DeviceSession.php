@@ -19,10 +19,12 @@ class DeviceSession extends Model
         return json_decode($this->session_data, true);
     }
 
-    public function save_session_data(array $data)
+    public function save_session_data(array $data, bool $withSave = true)
     {
         $this->session_data = json_encode($data);
-        $this->save();
+        if ($withSave) {
+            $this->save();
+        }
     }
 
     public function user()

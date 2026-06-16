@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\DeviceSession;
 use App\Models\Device;
 
+use Ramsey\Uuid\Uuid;
+
 class AuthController
 {
     /* =========================
@@ -12,53 +14,63 @@ class AuthController
     ========================= */
     public function refreshToken($request, $response)
     {
+        $device = $request->getAttribute('device') or null;
+        $device_exists = $request->getAttribute('device_exists') or false;
+        if ($device_exists == false) {
+            $response->getBody()->write(json_encode([ "error" => "Nowe urzadzenie" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
         $data = $request->getAttribute('params') or [];
-        
-        print_r($data);
-
         if (!isset($data['session_id'])) {
+            $session_id = (string) Uuid::uuid4();
 
-
-
-
-
+            $session = new DeviceSession();
+            $session->device_id = $device->id;
+            $session->session_id = $session_id;
+            $session->save_session_data([], false);
+            $session->save();
         } else {
             $session_id = $data['session_id'];
 
+            $session = DeviceSession::where('session_id', $session_id)->first();
+            if (!$session) {
+                $session_id = (string) Uuid::uuid4();
+
+                $session = new DeviceSession();
+                $session->device_id = $device->id;
+                $session->session_id = $session_id;
+                $session->save_session_data([], false);
+                $session->save();
+            } else {
+                if ($session->expired_at && strtotime($session->red_at) < time()) {
+                    $session_data = $session->decode_session_data();
+
+                    $session_id = (string) Uuid::uuid4();
+                    $session = new DeviceSession();
+                    $session->device_id = $device->id;
+                    $session->session_id = $session_id;
+                    $session->save_session_data($session_data, false);
+                    $session->save();
+                }
+            }
         }
 
-        $response->getBody()->write(json_encode([ "ok" => true, "data" => $data, "body" => $request->getParsedBody(), "headers" => $request->getBody(), "request" => print_r($request, true) ]));
-         return $response
+        $accessToken = $this->generateJwt($session->id);
+
+        $session_data = $session->decode_session_data();
+        if (!isset($session_data['user_id'])) {
+            $response->getBody()->write(json_encode([ "status" => true, "session_id" => $session_id, "data" => $session_data, "access_token" => $accessToken ]));
+        } else {
+            $response->getBody()->write(json_encode([ "status" => true, "session_id" => $session_id, "access_token" => $accessToken ]));
+        }
+
+        return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(200);
-        /*
-        $refreshToken = $data['session_id'] ?? null;
 
-        if (!$refreshToken) {
-            return $this->json($response, ['error' => 'refresh_token_required'], 400);
-        }
-
-        $tokenRecord = RefreshToken::where('token', $refreshToken)->first();
-
-        if (!$tokenRecord || strtotime($tokenRecord->expires_at) < time()) {
-            return $this->json($response, ['error' => 'invalid_refresh_token'], 401);
-        }
-
-        $user = User::find($tokenRecord->user_id);
-
-        if (!$user) {
-            return $this->json($response, ['error' => 'user_not_found'], 404);
-        }
-
-        $accessToken = $this->generateJwt($user->id);
-
-        return $this->json($response, [
-            'access_token' => $accessToken,
-            'user' => [
-                'id' => $user->id,
-                'login' => $user->login
-            ]
-        ]); */
     }
 
     /* =========================

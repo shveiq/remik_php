@@ -47,6 +47,27 @@ class ApiMiddleware
                     if ($device) {
                         $request = $request->withAttribute('device', $device);
                         $request = $request->withAttribute('device_exists', true);
+
+                        $needUpdate = false;
+                        /*if ($device->app_version !== $appData['app_version']) {
+                            $device->app_version = $appData['app_version'];
+                            $needUpdate = true;
+                        }*/
+                        if ($device->model !== $appData['model']) {
+                            $device->model = $appData['model'];
+                            $needUpdate = true;
+                        }
+                        if ($device->system_version !== $appData['system_version']) {
+                            $device->system_version = $appData['system_version'];
+                            $needUpdate = true;
+                        }
+                        if ($device->system !== $appData['system']) {
+                            $device->system = $appData['system'];
+                            $needUpdate = true;
+                        }
+                        if ($needUpdate) {
+                            $device->save();
+                        }
                     } else {
                         $device = new Device();
                         $device->app_id = $appData['id'];
