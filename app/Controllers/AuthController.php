@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers
+namespace App\Controllers;
 
 use App\Models\User;
 use Firebase\JWT\JWT;

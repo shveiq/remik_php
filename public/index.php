@@ -17,4 +17,4 @@ $app->addErrorMiddleware(true, true, true);
 //load routes
 (require __DIR__ .'/../routes.php')($app);
 
-$app->rum();
+$app->run();

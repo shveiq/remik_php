@@ -8,10 +8,10 @@ $capsule = new Capsule;
 
 $capsule->addConnection([
     'driver' => 'mysql',
-    'host' => 'localhost',
-    'database' => 'mydb',
-    'username' => 'root',
-    'password' => '',
+    'host' => 'sotarsoft.pl',
+    'database' => 'host924640_remik',
+    'username' => 'host924640_remik',
+    'password' => 'DFtfUG6rsmxraRVcRndM',
     'charset' => 'utf8mb4',
     'collation' => 'utf8mb4_unicode_ci',
 ]);
