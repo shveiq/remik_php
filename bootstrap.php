@@ -8,7 +8,7 @@ $capsule = new Capsule;
 
 $capsule->addConnection([
     'driver' => 'mysql',
-    'host' => 'sotarsoft.pl',
+    'host' => 'localhost', //'sotarsoft.pl',
     'database' => 'host924640_remik',
     'username' => 'host924640_remik',
     'password' => 'DFtfUG6rsmxraRVcRndM',

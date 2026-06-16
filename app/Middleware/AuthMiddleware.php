@@ -1,27 +1,51 @@
 <?php
 
-namespace App/Middleware;
+namespace App\Middleware;
+
+use Utils\JwtAuth;
+use Slim\Psr7\Response;
 
 class AuthMiddleware
 {
     public function __invoke($request, $handler)
     {
-        $auth = $request->getHeaderLine('Authorization');
+        $authHeader = $request->getHeaderLine('Authorization');
 
-        if (!$auth) {
-            return new \Slim\Psr7\Response(401);
+        if (!$authHeader) {
+            return $this->unauthorized();
         }
 
-        $token = str_replace('Bearer ', '', $auth);
+        $token = str_replace('Bearer ', '', $authHeader);
 
         try {
             $decoded = JwtAuth::decode($token);
         } catch (Exception $e) {
-            return new \Slim\Psr7\Response(401);
+            return $this->unauthorized();
         }
 
-        return $handler->handle(
-            $request->withAttribute('user', $decoded->data)
-        );
+        $sessionId = $decoded->uid ?? null;
+        /*
+        $session = Session::find($sessionId);
+        if (!$session) {
+            return -> $this->unauthorized();
+        }
+        $request = $request->withAttribute('session', $session);
+        */
+        print("OK");
+
+        return $handler->handle($request);
     }
+
+    private function unauthorized(): Response
+    {
+        $response = new Response();
+
+        $response->getBody()->write(json_encode([
+            'error' => 'unauthorized',
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(401);
+    }
+    
 }

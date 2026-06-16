@@ -16,7 +16,7 @@ class AuthController
     {
         $data = json_decode($request->getBody(), true);
 
-        $user = User::where('login', $data['login'] ?? null)->first();
+        $user = User::where('email', $data['email'] ?? null)->first();
 
         if (!$user || !password_verify($data['password'] ?? '', $user->password)) {
             return $this->json($response, ['error' => 'invalid_credentials'], 401);
