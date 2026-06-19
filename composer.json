@@ -7,9 +7,9 @@
         "ramsey/uuid": "^4.9"
     },
     "autoload": {
- 	"psr-4": {
+ 	    "psr-4": {
            "App\\": "app/",
            "Utils\\": "utils/"
-  	}
+  	    }
     }
 }

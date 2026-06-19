@@ -7,7 +7,7 @@ use Firebase\JWT\Key;
 
 class JwtAuth
 {
-    private static string $secret = 'SECRET_KEY_CHANGE_ME';
+    private static string $secret = 'SECRET_KEY_CHANGE_ME1234567890@#$%';
 
     public static function generate(array $data): string
     {

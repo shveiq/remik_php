@@ -3,8 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\DeviceSession;
-use App\Models\Device;
-
+use Utils\JwtAuth;
 use Ramsey\Uuid\Uuid;
 
 class AuthController
@@ -16,8 +15,8 @@ class AuthController
     {
         $device = $request->getAttribute('device') or null;
         $device_exists = $request->getAttribute('device_exists') or false;
-        if ($device_exists == false) {
-            $response->getBody()->write(json_encode([ "error" => "Nowe urzadzenie" ]));
+        if ($device == null) {
+            $response->getBody()->write(json_encode([ "error" => "Invalid request", "headers" => $request->getHeaders() ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(404);  
@@ -58,7 +57,7 @@ class AuthController
             }
         }
 
-        $accessToken = $this->generateJwt($session->id);
+        $accessToken = JwtAuth::generate(["session_id" => $session->id]);
 
         $session_data = $session->decode_session_data();
         if (!isset($session_data['user_id'])) {

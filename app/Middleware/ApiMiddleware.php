@@ -85,12 +85,24 @@ class ApiMiddleware
                     $request = $request->withAttribute('params', $data['request']);
                 }
             }
-        } 
-
-        $request->withAttribute('params', array("ok" => true));
+        } else {
+	    return $this->invalidContentType();
+        }
 
         $response = $handler->handle($request);
         return $response;
+    }
+
+    private function invalidContentType(): Response
+    {
+        $response = new Response();
+
+        $response->getBody()->write(json_encode([
+            'error' => 'invalid_content_type',
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
     }
 
     private function invalidMessage(): Response
