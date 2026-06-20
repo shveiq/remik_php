@@ -4,9 +4,17 @@ namespace App\Middleware;
 
 use Slim\Psr7\Response;
 use App\Models\Device;
+use Psr\Log\LoggerInterface;
 
 class ApiMiddleware
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function __invoke($request, $handler)
     {
         $contentType = $request->getHeaderLine('Content-Type');
@@ -16,6 +24,7 @@ class ApiMiddleware
             if (json_last_error() === JSON_ERROR_NONE) {
                 $request = $request->withParsedBody($contents);
             } else {
+                $this->logger->error('Invalid Request - json not parsed', [ 'content-type' => $contentType, 'contents' => $contents ]);
                 return $this->invalidMessage();
             }
         
@@ -26,11 +35,13 @@ class ApiMiddleware
                     if (array_key_exists('id', $appData)) {
                         $request = $request->withAttribute('app_id', $appData['id']);
                     } else {
+                        $this->logger->error('Invalid Request - no app id');
                         return $this->invalidApiMessage();
                     }
                     if (array_key_exists('app_version', $appData)) {
                         $request = $request->withAttribute('app_version', $appData['app_version']);
                     } else {
+                        $this->logger->error('Invalid Request - no app version');
                         return $this->invalidApiMessage();
                     }
                     if (array_key_exists('model', $appData)) {
@@ -86,7 +97,8 @@ class ApiMiddleware
                 }
             }
         } else {
-	    return $this->invalidContentType();
+            $this->logger->error('Invalid Request - invalid content type', [ 'content-type' => $contentType ]);
+    	    return $this->invalidContentType();
         }
 
         $response = $handler->handle($request);

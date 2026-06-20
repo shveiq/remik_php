@@ -4,24 +4,35 @@ namespace App\Middleware;
 
 use Slim\Psr7\Response;
 use App\Models\User;
+use Psr\Log\LoggerInterface;
 
 class AuthMiddleware
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function __invoke($request, $handler)
     {
         $session = $request->getAttribute('session') or null;
         if (!$session) {
+            $this->logger->error('Invalid Request - no session');
             return $this->unauthorized();
         }
 
         $session_data = $session->decode_session_data();
         if ($session_data === null || !isset($session_data['uid'])) {
+            $this->logger->error('Invalid Request - no session or user', [ "session_data" => $session_data ]);
             return $this->unauthorized();
         }
 
         $user = User::find($session_data['uid']);
 
         if (!$user) {
+            $this->logger->error('Invalid Request - no user in DB');
             return $this->unauthorized();
         }
 
@@ -29,11 +40,13 @@ class AuthMiddleware
 
         $receivedSignature = $request->getHeaderLine('X-HMAC-Signature');
         if (empty($receivedSignature)) {
+            $this->logger->error('Invalid Request - no hmac header');
             return $this->securityViolation();
         }
 
         $hmacKey = $session_data['hmac'];
         if (!$hmacKey) {
+            $this->logger->error('Invalid Request - no hmac in session');
             return $this->securityViolation();
         }
 
@@ -41,6 +54,7 @@ class AuthMiddleware
         $expectedSignature = hash_hmac('sha256', $contents, $hmacKey);
 
         if (!hash_equals($expectedSignature, $receivedSignature)) {
+            $this->logger->error('Invalid Request - hmac hash are not equals');
             return $this->securityViolation();
         }
 

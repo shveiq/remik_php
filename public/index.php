@@ -9,12 +9,19 @@ require __DIR__ .'/../vendor/autoload.php';
 require __DIR__ .'/../bootstrap.php';
 
 use Slim\Factory\AppFactory;
+use Monolog\Logger;
+use Monolog\Handler\RotatingFileHandler;
+use App\Middleware\RequestResponseLoggerMiddleware;
 
 $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addErrorMiddleware(true, true, true);
 
+$logger = new Logger('app');
+$logger->pushHandler(new RotatingFileHandler(__DIR__ . '/../logs/app.log', 7));
+$app->add(new RequestResponseLoggerMiddleware($logger));
+
 //load routes
-(require __DIR__ .'/../routes.php')($app);
+(require __DIR__ .'/../routes.php')($app, $logger);
 
 $app->run();
