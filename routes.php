@@ -1,21 +1,30 @@
 <?php
 
 use Slim\App;
-use App\Controllers\TestController;
+use Slim\Routing\RouteCollectorProxy;
+
 use App\Controllers\AuthController;
 
+use App\Middleware\ApiMiddleware;
+use App\Middleware\DeviceMiddleware;
 use App\Middleware\AuthMiddleware;
 
 return function(App $app) {
 	
-   $auth = new AuthController();
+   $app->add(new ApiMiddleware());
+
+   $app->get('/auth/refresh', '\AuthController::refreshToken');
    
-   $app->get('/auth/refresh', [$auth, 'refreshToken']);
-   $app->get('/auth/login', [$auth, 'login']);
-   $app->get('/auth/logout', [$auth, 'logout'])->add(new AuthMiddleware());
+   $app->group('', function (RouteCollectorProxy $group) {
+      $group->post('/auth/login', '\AuthController:login');
 
-   $test = new TestController();
+      $auth = new AuthController();
+      $group->post('/auth/register', [$auth, 'register']);   
+   })->add(new DeviceMiddleware);
 
-   $app->get('/test/info', [$test, 'info']);
-
+   $app->group('', function (RouteCollectorProxy $group) {
+      $auth = new AuthController();
+      $group->get('/auth/logout', [$auth, 'logout'])->add(new AuthMiddleware());
+   });
+   
 };

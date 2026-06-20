@@ -9,11 +9,16 @@ class JwtAuth
 {
     private static string $secret = 'SECRET_KEY_CHANGE_ME1234567890@#$%';
 
+    public static function generateHMACKey(): string
+    {
+        return bin2hex(random_bytes(32));
+    }
+
     public static function generate(array $data): string
     {
         $payload = [
             'iat' => time(),
-            'exp' => time() + 3600,
+            'exp' => time() +  7 * 24 * 3600,
             'data' => $data
         ];
 
