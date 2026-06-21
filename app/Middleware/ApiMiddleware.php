@@ -95,14 +95,16 @@ class ApiMiddleware
                 if (array_key_exists('request', $data)) {
                     $request = $request->withAttribute('params', $data['request']);
                 }
+                if (array_key_exists('session_id', $data)) {
+                    $request = $request->withAttribute('session_id', $data['session_id']);
+                }
             }
         } else {
             $this->logger->error('Invalid Request - invalid content type', [ 'content-type' => $contentType ]);
     	    return $this->invalidContentType();
         }
 
-        $response = $handler->handle($request);
-        return $response;
+        return $handler->handle($request);
     }
 
     private function invalidContentType(): Response

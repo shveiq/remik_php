@@ -2,8 +2,17 @@
 
 namespace App\Controllers;
 
+use Psr\Log\LoggerInterface;
+
 class UserController
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function profile($request, $response)
     {
         $user = $request->getAttribute('user') or null;   

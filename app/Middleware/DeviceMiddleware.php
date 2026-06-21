@@ -24,11 +24,9 @@ class DeviceMiddleware
             return $this->invalidApiRequest();
         }
 
-        $data = $request->getAttribute('params') or [];
-        if ($data['session_id'] != null) {
-            $session_id = $data['session_id'];
-        } else {
-            $this->logger->error('Invalid Session', [ 'data' => $data ]);
+        $session_id = $request->getAttribute('session_id') or [];
+        if (!$session_id) {
+            $this->logger->error('Invalid Session - no session id');
             return $this->invalidSession();
         }
 
@@ -37,19 +35,18 @@ class DeviceMiddleware
             $this->logger->error('Invalid Session - no record in DB');
             return $this->invalidSession();
         } else {
-            if ($session->expired_at && strtotime($session->expired_at) < time()) {
+            if ($session->expired_date && strtotime($session->expired_date) < time()) {
                 $this->logger->error('Invalid Session - session expired', [ 'time' => time(), 'expired_date' =>$session->expired_at ]);
                 return $this->invalidSession();
             } else {
-                $session_expired_at = date('Y-m-d H:i:s', time() + 60 * 60 * 24 * 7);
-                $session->expired_at = $session_expired_at;
+                $session_expired_date = date('Y-m-d H:i:s', time() + 60 * 60 * 24 * 7);
+                $session->expired_date = $session_expired_date;
                 $session->save();
             }
             $request = $request->withAttribute('session', $session);
         }
 
-        $response = $handler->handle($request);
-        return $response;
+        return $handler->handle($request);
     }
 
     private function invalidApiRequest(): Response

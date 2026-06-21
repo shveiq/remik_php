@@ -63,15 +63,15 @@ CREATE TABLE `league_types` (
   `isDeleted` tinyint(4) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Bronzowa III', 'liga_bronze.jpg', '0', '30', 10, 0, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Bronzowa II', 'liga_bronze.jpg', '5', '30', 10, 7, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Bronzowa I', 'liga_bronze.jpg', '5', '30', 10, 7, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Brązowa III', 'liga_bronze.jpg', '0', '30', 10, 0, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Brązowa II', 'liga_bronze.jpg', '5', '30', 10, 7, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Brązowa I', 'liga_bronze.jpg', '5', '30', 10, 7, 5 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Srebrna III', 'liga_silver.jpg', '10', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Srebrna II', 'liga_silver.jpg', '10', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Srebrna I', 'liga_silver.jpg', '10', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Zlota III', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Zlota II', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
-INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Zlota I', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Złota III', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Złota II', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
+INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Złota I', 'liga_gold.jpg', '20', '30', 10, 7, 6 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Platynowa III', 'liga_platinum.jpg', '30', '30', 10, 8, 7 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Platynowa II', 'liga_platinum.jpg', '30', '30', 10, 8, 7 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
 INSERT INTO `league_types` (`id`, `name`, `logo`, `percentage`, `max_players`, `count_promoted`, `count_dropouts`, `duration_days`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Platynowa I', 'liga_platinum.jpg', '30', '30', 10, 8, 7 * 24 *60 * 60, current_timestamp(), current_timestamp(), '0');
@@ -89,6 +89,7 @@ CREATE TABLE `leagues` (
   `id` int(11) AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(255) NOT NULL,
   `league_type_id` int(11) NOT NULL,
+  `free_slots` int(11) NOT NULL DEFAULT 0,
   `start_date` datetime NOT NULL DEFAULT current_timestamp(),
   `end_date` datetime NOT NULL DEFAULT current_timestamp(),
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
@@ -96,6 +97,8 @@ CREATE TABLE `leagues` (
   `isDeleted` tinyint(4) NOT NULL DEFAULT 0,
   CONSTRAINT fk_leagues_league_types FOREIGN KEY (`league_type_id`) REFERENCES `league_types`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `leagues` (`id`, `name`, `league_type_id`, `free_slots`, `start_date`, `end_date`, `created_date`, `updated_date`, `isDeleted`) VALUES (NULL, 'Liga Brązowa III - 1', 1, 30, current_timestamp(), current_timestamp() + INTERVAL 5 DAY, current_timestamp(), current_timestamp(), '0');
 
 CREATE TABLE `devices` (
   `id` int(11) AUTO_INCREMENT PRIMARY KEY,
