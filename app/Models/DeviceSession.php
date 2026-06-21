@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table(timestamps: false)]
 class DeviceSession extends Model
 {
-    public function device(): HasOne
+    public function device(): BelongsTo
     {
-        return $this->hasOne(Device::class);
+        return $this->belongsTo(Device::class);
     }
 
     public function decode_session_data()

@@ -137,6 +137,8 @@ DELIMITER ;
 CREATE TABLE `users` (
   `id` int(11) AUTO_INCREMENT PRIMARY KEY,
   `nickname` varchar(50) NOT NULL,
+  `avatar_id` varchar(30) NULL,
+  `avatar_url` varchar(150) NULL,
   `email` varchar(100) NULL COMMENT 'puste dla konta bot i guest',
   `password` varchar(50) NULL COMMENT 'puste dla konta bot i guest', 
   `birthday` varchar(20) NULL,

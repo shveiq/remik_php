@@ -4,20 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 #[Table(timestamps: false)]
 class User extends Model
 {
-    public function level(): HasOne
+    public function level(): BelongsTo
     {
-        return $this->hasOne(Level::class);
+        return $this->belongsTo(Level::class);
     }
 
-    public function league(): HasOne
+    public function league(): BelongsTo
     {
-        return $this->hasOne(League::class);
+        return $this->belongsTo(League::class);
     }
 
     public function devices(): BelongsToMany
@@ -49,6 +49,22 @@ class User extends Model
             $league->save();
         }
 
+        return $user;
+    }
+
+    public static function createBot(string $nickname, string $avatar_id, int $league_id, int $level_id, int $level_points, $coins, $diamonds) : User
+    {
+        $user = new User();
+        $user->nickname = $nickname;
+        $user->avatar_id = $avatar_id;
+        $user->isBot = true;
+        $user->isGuest = false;
+        $user->league_id = $league_id;
+        $user->level_id = $level_id;
+        $user->level_points = $level_points;
+        $user->coins_amount = $coins;
+        $user->diamonds_amount = $diamonds;
+        $user->save();
         return $user;
     }
 

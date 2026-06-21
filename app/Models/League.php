@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Table(timestamps: false)]
 class League extends Model
@@ -15,9 +15,9 @@ class League extends Model
         return $this->hasMany(User::class);
     }
 
-    public function type(): HasOne
+    public function type(): BelongsTo
     {
-        return $this->hasOne(LeagueType::class, 'league_type_id', 'id');
+        return $this->belongsTo(LeagueType::class, 'league_type_id', 'id');
     }
 
 
