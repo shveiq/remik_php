@@ -98,8 +98,8 @@ class User extends Model
     {
         $this->level_points = 0;
         $this->league_points = 0;
-        $this->coins_amount = 2500;
-        $this->diamonds_amount = 50;
+        $this->coins_amount = 5000;
+        $this->diamonds_amount = 30;
         $this->save();
     }
 

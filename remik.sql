@@ -148,6 +148,7 @@ CREATE TABLE `users` (
   `league_points` INT NOT NULL,
   `coins_amount` INT NOT NULL,
   `diamonds_amount` INT NOT NULL,
+  `mnr` INT NOT NULL,
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isBot` tinyint(4) NOT NULL DEFAULT 0,
