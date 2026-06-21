@@ -28,8 +28,8 @@ class UserController
             "coins" => $user->coins_amount,
             "diamonds" => $user->diamonds_amount,
             "level" => $user->level_id,
-            "league" => $user->league->name,
-            "league_logo" => $user->league->type->logo,
+            //"league" => $user->league->name,
+            //"league_logo" => $user->league->type->logo,
             "lp" => $user->level_points,
             "lgp" => $user->league_points
         ]));

@@ -44,15 +44,18 @@ class AuthMiddleware
             return $this->securityViolation();
         }
 
-        $hmacKey = $session_data['hmac'];
-        if (!$hmacKey) {
+        $hmacKeyHex = $session_data['hmac'];
+        if (!$hmacKeyHex) {
             $this->logger->error('Invalid Request - no hmac in session');
             return $this->securityViolation();
         }
+        $hmacKey = hex2bin($hmacKeyHex);
 
         $contents = file_get_contents('php://input');
         $expectedSignature = hash_hmac('sha256', $contents, $hmacKey);
 
+        $this->logger->info($expectedSignature);
+        $this->logger->info($receivedSignature);
         if (!hash_equals($expectedSignature, $receivedSignature)) {
             $this->logger->error('Invalid Request - hmac hash are not equals');
             return $this->securityViolation();
