@@ -200,7 +200,7 @@ class AuthController
         $session->save_session_data($session_data, true);
 
         // Generate access token
-        $accessToken = JwtAuth::generate(["session_id" => $session->id, "uid" => $user->id, "exists" => true]);
+        $accessToken = JwtAuth::generate(["session_id" => $session->session_id, "uid" => $user->id, "exists" => true]);
         $response->getBody()->write(json_encode([ "token" => $accessToken ]));
 
         return $response
@@ -285,7 +285,7 @@ class AuthController
         $session->save_session_data($session_data, true);
 
         // Generate access token
-        $accessToken = JwtAuth::generate(["session_id" => $session->id, "uid" => $user->id, "exists" => true]);
+        $accessToken = JwtAuth::generate(["session_id" => $session->session_id, "uid" => $user->id, "exists" => true]);
         $response->getBody()->write(json_encode([ "token" => $accessToken ]));
 
         return $response
