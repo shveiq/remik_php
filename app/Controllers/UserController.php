@@ -23,6 +23,13 @@ class UserController
                 ->withStatus(404);  
         }
 
+        if ($user->isBot) {
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(403);  
+        }
+
         $avatar = array();
         if (isset($user->avatar_id) && strlen($user->avatar_id) > 0) {
             $avatar = array("id" => $user->avatar_id);
@@ -30,19 +37,47 @@ class UserController
             $avatar = array("url" => $user->avatar_url);
         }
 
+        $emailEncoded = null;
+        if (!$user->isGuest) {
+            $session = $request->getAttribute('session') or null;
+            if (!$session) {
+                $session_data = $session->decode_session_data();
+                if ($session_data === null) { 
+                    $hmacKeyHex = $session_data['hmac'];
+                    if (!$hmacKeyHex) {
+                        $this->logger->error('Invalid Request - no hmac in session');
+                        $response->getBody()->write(json_encode([ 'error' => 'security_violation' ]));
+                        return $response
+                            ->withHeader('Content-Type', 'application/json')
+                            ->withStatus(401); 
+                    }
+                    $hmacKey = hex2bin($hmacKeyHex);
+                    $iv = random_bytes(openssl_cipher_iv_length('aes-256-gcm'));
+                    $ciphertext = openssl_encrypt(
+                        $user->email,
+                        'aes-256-gcm',
+                        $hmacKey,
+                        OPENSSL_RAW_DATA,
+                        $iv,
+                        $tag
+                    );
+                    $emailEncoded = base64_encode($iv . $tag . $ciphertext);
+                }
+            }
+        }
+
         $response->getBody()->write(json_encode([
             "current_time" => date("Y-m-d h:i:s", time()),
             "nickname" => $user->nickname,
             "avatar" => $avatar,
+            "email" => $emailEncoded,
             "coins" => $user->coins_amount,
             "diamonds" => $user->diamonds_amount,
             "level" => $user->level_id,
             "league" => $user->league->name,
-            "league_percentage" => $user->league->type->percentage,
             "league_logo" => $user->league->type->logo,
-            "league_start_date" => $user->league->start_date,
-            "league_end_date" => $user->league->end_date,
             "lp" => $user->level_points,
+            "max_lp" => $user->level->amount,
             "lgp" => $user->league_points
         ]));
 
@@ -82,6 +117,7 @@ class UserController
         $response->getBody()->write(json_encode([
             "name" => $league->name, 
             "logo" => $league->type->logo,
+            "percentage" => $league->type->percentage,
             "promoted" => $league->type->count_promoted,
             "dropouts" => $league->type->count_dropouts,
             "start_date" => $league->start_date, 

@@ -44,7 +44,7 @@ class AuthController
             $session->save();
         } else {
             $this->logger->info("with session id");
-            $session_id = $$data['session_id'];
+            $session_id = $data['session_id'];
 
             $session = DeviceSession::where('session_id', $session_id)->first();
             if (!$session) {

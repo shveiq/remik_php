@@ -78,8 +78,11 @@ class User extends Model
 
         $count = User::count();
 
+        $avatarId = random_int(0, 103);
+
         $user = new User();
         $user->nickname = "UPL".$count;
+        $user->avatar_id = "avatar_".$avatarId."_.png";
         $user->isBot = false;
         $user->isGuest = true;
         $user->league_id = $league->id;
