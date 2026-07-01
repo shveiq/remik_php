@@ -142,13 +142,15 @@ CREATE TABLE `users` (
   `email` varchar(100) NULL COMMENT 'puste dla konta bot i guest',
   `password` varchar(50) NULL COMMENT 'puste dla konta bot i guest', 
   `birthday` varchar(20) NULL,
+  `mnr` INT NOT NULL,
   `level_id` INT(11) NOT NULL,
   `level_points` INT NOT NULL,
   `league_id` INT(11) NOT NULL,
   `league_points` INT NOT NULL,
   `coins_amount` INT NOT NULL,
   `diamonds_amount` INT NOT NULL,
-  `mnr` INT NOT NULL,
+  `last_free_coins_date` datetime NULL,
+  `last_wheels_date` datetime NULL,
   `created_date` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `isBot` tinyint(4) NOT NULL DEFAULT 0,
@@ -173,3 +175,30 @@ CREATE TABLE `users_devices` (
   CONSTRAINT `fk_users_devices_device` FOREIGN KEY (`device_id`)
         REFERENCES `devices`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `tables` (
+  `id` int(11) AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(50) NOT NULL,
+  `price` INT(11) NOT NULL,
+  `xp` INT(11) NOT NULL,
+  `diamonds` INT(11) NOT NULL,
+  `unlock_level_id` INT(11) NOT NULL,
+  `created_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `isDeleted` tinyint(4) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_tables_levels FOREIGN KEY (`unlock_level_id`) REFERENCES `levels`(`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla nowicjuszy I", 300, 5, 1, 1, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla nowicjuszy II", 600, 10, 3, 2, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla nowicjuszy III", 900, 15, 5, 5, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla ekspertów I", 1200, 20, 9, 10, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla ekspertów II", 2500, 40, 12, 13, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla ekspertów III", 5000, 80, 18, 15, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla zawodowców I", 10000, 170, 25, 18, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla zawodowców II", 15000, 250, 50, 21, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla zawodowców III", 32000, 530, 100, 23, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla mistrzów I", 45000, 750, 200, 25, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla mistrzów II", 75000, 1250, 400, 30, current_timestamp(), current_timestamp(), 0);
+INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla mistrzów III", 150000, 2500, 800, 35, current_timestamp(), current_timestamp(), 0);
+
