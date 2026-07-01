@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table(timestamps: false)]
 class User extends Model
@@ -23,6 +24,16 @@ class User extends Model
     public function devices(): BelongsToMany
     {
         return $this->belongsToMany(Device::class, 'users_devices');
+    }
+
+    public function games(): BelongsToMany
+    {
+        return $this->belongsToMany(Game::class, 'games_users');
+    }
+
+    public function gameSummaries(): HasMany
+    {
+        return $this->hasMany(GameSummary::class, 'user_id', 'id');
     }
 
     public static function createNewUser(string $nickname, string $email, string $password, string $birthday) : User

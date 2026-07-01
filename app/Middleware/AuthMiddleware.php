@@ -54,6 +54,11 @@ class AuthMiddleware
         $contents = file_get_contents('php://input');
         $expectedSignature = hash_hmac('sha256', $contents, $hmacKey);
 
+	$this->logger->info($hmacKey);
+        $this->logger->info($contents);
+        $this->logger->info($expectedSignature);
+        $this->logger->info($receivedSignature);
+
         if (!hash_equals($expectedSignature, $receivedSignature)) {
             $this->logger->error('Invalid Request - hmac hash are not equals');
             return $this->securityViolation();

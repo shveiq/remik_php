@@ -78,7 +78,9 @@ class UserController
             "league_logo" => $user->league->type->logo,
             "lp" => $user->level_points,
             "max_lp" => $user->level->amount,
-            "lgp" => $user->league_points
+            "lgp" => $user->league_points,
+            "last_free_coins_date" => $user->last_free_coins_date,
+            "last_wheels_date" => $user->last_wheels_date
         ]));
 
         return $response
@@ -128,5 +130,58 @@ class UserController
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(200);
+    }
+
+    public function getBonus($request, $response) 
+    {
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $data = $request->getAttribute('params') or [];
+        if (!isset($data['bonus_type'])) {
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+        
+        if ($data['bonus_type'] == 'coins') {
+            $percentage = (100 + $user->league->type->percentage) / 100;
+            $user->coins_amount += 200 * $percentage;
+            $user->last_free_coins_date = date('Y-m-d H:i:s', time());
+            $user->save();
+        } else if ($data['bonus_type'] == 'diamonds') {
+            $user->diamonds_amount += 10;
+            $user->save();
+        } else if (($data['bonus_type'] == 'wheeleOfFortune') && isset($data['bonus_value'])) {
+            $bonus_value = intval($data['bonus_value']);
+            if ($bonus_value > 0) {
+                $user->coins_amount += $bonus_value;
+                $user->last_wheels_date = date('Y-m-d H:i:s', time());
+                $user->save();
+            } else {
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            }
+        } else {
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $response->getBody()->write(json_encode([
+            "status" => "ok"
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);  
     }
 }
