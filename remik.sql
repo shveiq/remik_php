@@ -202,3 +202,66 @@ INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`
 INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla mistrzów II", 75000, 1250, 400, 30, current_timestamp(), current_timestamp(), 0);
 INSERT INTO `tables` (`id`, `name`, `price`, `xp`, `diamonds`, `unlock_level_id`, `created_date`, `updated_date`, `isDeleted`) VALUES (null, "dla mistrzów III", 150000, 2500, 800, 35, current_timestamp(), current_timestamp(), 0);
 
+CREATE TABLE `games` (
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+  `table_id` INT(11) NOT NULL,
+  `max_players` INT(11) NOT NULL,
+  `current_player_id` int(11) NULL,
+  `cards` VARCHAR(400) NOT NULL DEFAULT '[]',
+  `draws` VARCHAR(400) NOT NULL DEFAULT '[]',
+  `melds` VARCHAR(300) NOT NULL DEFAULT '[]',  
+  `status` VARCHAR(10) NOT NULL COMMENT 'INIT,START,LOOP,END',
+  `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
+  `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  CONSTRAINT fk_games_users FOREIGN KEY (`current_player_id`) REFERENCES `users`(`id`), 
+  CONSTRAINT fk_games_tables FOREIGN KEY (`table_id`) REFERENCES `tables`(`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE games_users (
+  `game_id` INT(11) NOT NULL,
+  `user_id` INT(11) NOT NULL,
+  `cards` VARCHAR(60) NOT NULL DEFAULT '[]',
+ 
+  PRIMARY KEY (`user_id`, `game_id`),
+
+  CONSTRAINT `fk_games_users_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`),
+  CONSTRAINT `fk_games_users_game` FOREIGN KEY (`game_id`)
+        REFERENCES `games`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE game_summaries (
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+  `game_id` INT(11) NOT NULL,
+  `user_id` INT(11) NOT NULL,
+  `place` INT(5) NOT NULL,  
+  `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
+  `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  CONSTRAINT `fk_game_summaries_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`),
+  CONSTRAINT `fk_game_summaries_game` FOREIGN KEY (`game_id`)
+        REFERENCES `games`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE achievements (
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+  `achievements` VARCHAR(50) NOT NULL,
+  `logo` VARCHAR(255) NOT NULL,
+  `amount` INT(11) NOT NULL,
+  `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
+  `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE user_achievements(
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+  `achievement_id` INT(11) NOT NULL,
+  `user_id` INT(11) NOT NULL,
+  `amount` INT(11) NOT NULL,
+  `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
+  `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  CONSTRAINT `fk_user_achievements_achievement` FOREIGN KEY (`achievement_id`)
+        REFERENCES `achievements`(`id`),
+  CONSTRAINT `fk_user_achievements_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
