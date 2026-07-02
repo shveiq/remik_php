@@ -6,6 +6,7 @@ use App\Models\Game;
 use App\Models\User;
 
 use Psr\Log\LoggerInterface;
+use Utils\PlayingCard;
 
 class GameController
 {
@@ -21,6 +22,7 @@ class GameController
     {
         $user = $request->getAttribute('user') or null;   
         if (!$user) {
+            $this->logger->error("invalid request - invalid user");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
@@ -29,6 +31,7 @@ class GameController
 
         $data = $request->getAttribute('params') or [];
         if (!isset($data['table_id']) || !is_numeric($data['table_id'])) {
+            $this->logger->error("invalid request - without table_id");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
@@ -62,30 +65,18 @@ class GameController
 
     public function getPlayers($request, $response) 
     {
-        return $response
-            ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500);
-    }
-
-    public function shuffleDeck($request, $response) 
-    {
-        return $response
-            ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500);
-    }
-
-    public function statusGame($request, $response)
-    {
         $user = $request->getAttribute('user') or null;   
         if (!$user) {
+            $this->logger->error("invalid request - invalid user");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(404);  
         }
-
+        
         $data = $request->getAttribute('params') or [];
         if (!isset($data['game_id']) || !is_numeric($data['game_id'])) {
+            $this->logger->error("invalid request - without game_id");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
@@ -94,6 +85,133 @@ class GameController
 
         $game = Game::find($data['game_id']);
         if (!$game) {
+            $this->logger->error("invalid request - game_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        if ($game->status != "START") {
+            $this->logger->error("invalid request - game invalid state");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        // TODO Tu jakas logika wybierania zawodnikow
+        $allAcceptPlayers = User::all();
+        $allAcceptPlayers = shuffle($allAcceptPlayers);
+
+        for ($i=0; $i<$game->max_players; $i++) {
+            $first = array_shift($allAcceptPlayers);
+        }
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(500);
+    }
+
+    public function shuffleDeck($request, $response) 
+    {
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $this->logger->error("invalid request - invalid user");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+        
+        $data = $request->getAttribute('params') or [];
+        if (!isset($data['game_id']) || !is_numeric($data['game_id'])) {
+            $this->logger->error("invalid request - without game_id");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $game = Game::find($data['game_id']);
+        if (!$game) {
+            $this->logger->error("invalid request - game_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        if ($game->status != "START") {
+            $this->logger->error("invalid request - game invalid state");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $cards = PlayingCard::generateDeck();
+        $cards = shuffle($cards);
+
+        $mPlayers = $game->playerCards()->get();
+        $max_players = count($mPlayers);
+
+        $players = array();
+        for($j=0; $j<$max_players; $j++) {
+            $players[] = [];
+        }
+        for ($i=0; $i<13; $i++) {
+            for ($j=0; $j<$max_players; $j++) {
+                $first = array_shift($cards);
+                $players[$j][] = $first;
+            }
+        }
+
+        $i=0;
+        foreach ($mPlayers as $playerCard) {
+            $playerCard->cards = $players[$i];
+            $playerCard->save();
+            $i++;            
+        }
+
+        $game->cards = $cards;
+        $game->status = "SHUFFLED";
+        $game->save();
+
+        $response->getBody()->write(json_encode([
+            "current_time" => date('Y-m-d H:i:s'),
+            "id" => $game->id, 
+            "status" => $game->status
+        ]));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(201);
+    }
+
+    public function statusGame($request, $response)
+    {
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $this->logger->error("invalid request - invalid user");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $data = $request->getAttribute('params') or [];
+        if (!isset($data['game_id']) || !is_numeric($data['game_id'])) {
+            $this->logger->error("invalid request - without game_id");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $game = Game::find($data['game_id']);
+        if (!$game) {
+            $this->logger->error("invalid request - game_id not in DB");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
