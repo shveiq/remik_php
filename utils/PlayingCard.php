@@ -4,10 +4,10 @@ namespace Utils;
 
 enum Suit:string {
   case Unknown = '';
-  case Hearts = '♥'; // kier
-  case Diamonds = '♦'; // karo
-  case Clubs = '♣'; // trefl
-  case Spades = '♠'; //pik
+  case Hearts = 'H'; // kier
+  case Diamonds = 'D'; // karo
+  case Clubs = 'C'; // trefl
+  case Spades = 'S'; //pik
 }
 
 enum Rank:int {
@@ -43,32 +43,49 @@ class PlayingCard {
     switch ($this->rank) {
         case Rank::Two:
             $rankStr = "2";
+            break;
         case Rank::Three:
             $rankStr = "3";
+            break;
         case Rank::Four:
             $rankStr = "4";
+            break;
         case Rank::Five:
             $rankStr = "5";
+            break;
         case Rank::Six:
             $rankStr = "6";
+            break;
         case Rank::Seven:
             $rankStr = "7";
+            break;
         case Rank::Eight:
             $rankStr = "8";
+            break;
         case Rank::Nine:
             $rankStr = "9";
+            break;
         case Rank::Ten:
             $rankStr = "10";
+            break;
         case Rank::Jack:
             $rankStr = "J";
+            break;
         case Rank::Queen:
             $rankStr = "Q";
+            break;
         case Rank::King:
             $rankStr = "K";
+            break;
         case Rank::Ace:
             $rankStr = "A";
+            break;
         case Rank::Joker:
             $rankStr = "Joker";
+            break;
+        default:
+            $rankStr = "";
+            break;
     } 
     if ($this->suit != Suit::Unknown) {
         return $rankStr."".$this->suit->value;  
