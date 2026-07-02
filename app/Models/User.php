@@ -93,7 +93,7 @@ class User extends Model
 
         $user = new User();
         $user->nickname = "UPL".$count;
-        $user->avatar_id = "avatar_".$avatarId."_.png";
+        $user->avatar_id = "avatar_".$avatarId.".png";
         $user->isBot = false;
         $user->isGuest = true;
         $user->league_id = $league->id;

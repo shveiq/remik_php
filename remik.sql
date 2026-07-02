@@ -210,7 +210,7 @@ CREATE TABLE `games` (
   `cards` VARCHAR(400) NOT NULL DEFAULT '[]',
   `draws` VARCHAR(400) NOT NULL DEFAULT '[]',
   `melds` VARCHAR(300) NOT NULL DEFAULT '[]',  
-  `status` VARCHAR(10) NOT NULL COMMENT 'INIT,START,LOOP,END',
+  `status` VARCHAR(10) NOT NULL COMMENT 'INIT,START,SHUFFLE,LOOP,END',
   `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
   `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   CONSTRAINT fk_games_users FOREIGN KEY (`current_player_id`) REFERENCES `users`(`id`), 

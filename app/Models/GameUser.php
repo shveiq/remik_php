@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Table(name: "games_users", timestamps: false)]
-class UserDevice extends Model
+class GameUser extends Model
 {
     public function user(): BelongsTo
     {
