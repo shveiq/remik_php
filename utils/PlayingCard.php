@@ -38,6 +38,186 @@ class PlayingCard {
     $this->rank = $rank;
   }
 
+ public function equals(PlayingCard $card): bool {
+    return $this->suit == $card->suit && $this->rank == $card->rank;
+  }
+
+  public function equalsSuit(PlayingCrd $card): bool {
+    return $this->suit == $card->suit;
+  }
+
+  public function equalsRank(PlayingCard $card): bool {
+    return $this->rank == $card->rank;
+  }
+
+  public function isRankLower(PlayingCard $card): bool {
+    return $this->rank->value < $card->rank->value;
+  }
+
+  public function isRankHigher(PlayingCard $card): bool {
+    return $this->rank->value > $card->rank->value;
+  }
+
+  public function isSuitLower(PlayingCard $card): bool {
+    switch ($this->suit) {
+        case Suit::Clubs:
+            return false;
+        case Suit::Diamonds:
+            if ($card->suit == Suit::Clubs) {
+                return true;
+            } else {
+                return false;
+            }
+        case Suit::Hearts:
+            if ($card->suit == Suit::Clubs || $card->suit == Suit::Diamonds) {
+                return true;
+            } else {
+                return false;
+            }
+        case Suit::Spades:
+            if ($cards->suit != Suit::Spades) {
+                return true;
+            } else {
+                return false;
+            }
+        default:
+            return false;
+    }
+  }
+
+  public function isSuitHigher(PlayingCard $card): bool {
+    switch ($this->suit) {
+        case Suit::Clubs:
+            if ($cards-suit != Suit::Clubs) {
+                return true;
+            } else {
+                return false;
+            }
+        case Suit::Diamonds:
+            if ($card->suit == Suit::Spades || $card->suit == Suit::Hearts) {
+                return true;
+            } else {
+                return false;
+            }
+        case Suit::Hearts:
+            if ($card->suit == Suit::Spades) {
+                return true;
+            } else {
+                return false;
+            }
+        case Suit::Spades:
+            return false;
+        default:
+            return false;
+    }
+  }
+
+  public function next(): PlayingCard | null {
+    if ($this->rank == Rank::Joker) {
+        return null;
+    } else {
+        switch ($this->rank) {
+            case Rank::Two:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Three);
+            case Rank::Three:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Four);
+            case Rank::Four:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Five);
+            case Rank::Five:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Six);
+            case Rank::Six:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Seven);
+            case Rank::Seven:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Eight);
+            case Rank::Eight:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Nine);
+            case Rank::Nine:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Ten);
+            case Rank::Ten:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Jack);
+            case Rank::Jack:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Queen);
+            case Rank::Queen:
+                return new PlayingCard(suit: $this->suit, rank: Rank::King);
+            case Rank::King:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Ace);
+            case Rank::Ace:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Two);
+            default:
+                return null;
+        }
+    }
+  }
+
+  public function isNext(PlayingCard $card): bool {
+    if ($this->rank == Rank::Joker) {
+      return true;
+    } else {
+      if ($card->rank == Rank::Joker) {
+        return true;
+      } else {
+        if (!$this->next()->equals($card)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+
+  public function before(): PlayingCard | null {
+    if ($this->rank == Rank::Joker) {
+        return null;
+    } else {
+        switch ($this->rank) {
+            case Rank::Two:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Ace);
+            case Rank::Three:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Two);
+            case Rank::Four:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Three);
+            case Rank::Five:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Four);
+            case Rank::Six:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Five);
+            case Rank::Seven:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Six);
+            case Rank::Eight:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Seven);
+            case Rank::Nine:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Eight);
+            case Rank::Ten:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Nine);
+            case Rank::Jack:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Ten);
+            case Rank::Queen:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Jack);
+            case Rank::King:
+                return new PlayingCard(suit: $this->suit, rank: Rank::Queen);
+            case Rank::Ace:
+                return new PlayingCard(suit: $this->suit, rank: Rank::King);
+            default:
+                return null;
+        }
+    }
+  }
+
+  public function isBefore(PlayingCard $card): bool {
+   if ($this->rank == Rank::Joker) {
+      return true;
+    } else {
+      if ($card->rank == Rank::Joker) {
+        return true;
+      } else {
+        if (!$this->before()->equals($card)) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+  }
+
   public function toJSONString(): string {
     $rankStr = "";
     switch ($this->rank) {
