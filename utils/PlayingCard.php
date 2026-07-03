@@ -38,7 +38,7 @@ class PlayingCard {
     $this->rank = $rank;
   }
 
- public function equals(PlayingCard $card): bool {
+  public function equals(PlayingCard $card): bool {
     return $this->suit == $card->suit && $this->rank == $card->rank;
   }
 

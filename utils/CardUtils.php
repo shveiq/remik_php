@@ -27,7 +27,7 @@ class CardUtils {
                                 $isCorrect = false;
                                 return $isCorrect;
                             }
-                        }                        
+                        }
                         $prevLastCard = $lastCard;
                         $lastCard = $currentCard;
                     }
@@ -96,10 +96,10 @@ class CardUtils {
     * @param list<PlayingCard> $cards
     */
     public static function isValidMeld(array $cards): bool {
-        return isSequence($cards) || isGroup($cards);
+        return CardUtils::isSequence($cards) || CardUtils::isGroup($cards);
     }
 
-    /**
+   /**
      * @param list<PlayingCard> $cards
      */
     public static function sortCardsByRank(array $cards): array {
