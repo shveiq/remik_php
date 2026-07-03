@@ -5,8 +5,8 @@ namespace Utils;
 class CardUtils {
 
     /**
-    * @param list<PlayingCard> $cards
-    */
+     * @param list<PlayingCard> $cards
+     */
     public static function isSequence(array $cards): bool {
         if (count($cards) >= 3) {
             $lastCard = $cards[0];
@@ -48,8 +48,8 @@ class CardUtils {
     }
 
     /**
-    * @param list<PlayingCard> $cards
-    */
+     * @param list<PlayingCard> $cards
+     */
     public static function isGroup(array $cards): bool {
         $count_cards = count($cards);
         if ($count_cards < 3 && $count_cards > 4) {
@@ -93,13 +93,13 @@ class CardUtils {
     }
 
     /**
-    * @param list<PlayingCard> $cards
-    */
+     * @param list<PlayingCard> $cards
+     */
     public static function isValidMeld(array $cards): bool {
         return CardUtils::isSequence($cards) || CardUtils::isGroup($cards);
     }
 
-   /**
+    /**
      * @param list<PlayingCard> $cards
      */
     public static function sortCardsByRank(array $cards): array {
@@ -128,8 +128,38 @@ class CardUtils {
     }
 
     /**
-    * @param list<PlayingCard> $cards
-    */
+     * @param list<PlayingCard> $cards
+     */
+    public static function sortCards(array $cards): array {
+        $colors = array("S" => array(), "C" => array(), "H" => array(), "D" => array());
+        foreach ($cards as $card) {
+            $colors[$card->suit->value][] = $card;
+        }
+        $colors["D"] =CardUtils::sortCardsByRank($colors["D"]);
+        $colors["C"] =CardUtils::sortCardsByRank($colors["C"]);
+        $colors["H"] = CardUtils::sortCardsByRank($colors["H"]);
+        $colors["S"] =CardUtils::sortCardsByRank($colors["S"]);
+
+        $res = array();
+        foreach($colors["D"] as $card) {
+            $res[] = $card;
+        }
+        foreach($colors["C"] as $card) {
+            $res[] = $card;
+        }
+        foreach($colors["H"] as $card) {
+            $res[] = $card;
+        }
+        foreach($colors["S"] as $card) {
+            $res[] = $card;
+        }
+        return $res;
+    }
+
+
+    /**
+     * @param list<PlayingCard> $cards
+     */
     public static function toString(array $cards): string {
       $res = "";
       $znak = "";
