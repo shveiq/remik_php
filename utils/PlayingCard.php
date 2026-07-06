@@ -284,35 +284,49 @@ class PlayingCard {
         if (strlen($json) == 2) {
             $rankStr = substr($json, 0, 1);
             $suitStr = substr($json, 1, 1);
+
             $suit = Suit::from($suitStr);
             $rank = Rank::Unknown;
             switch($rankStr) {
                 case "2":
                     $rank = Rank::Two;
+                    break;
                 case "3":
                     $rank = Rank::Three;
+                    break;
                 case "4":
                     $rank = Rank::Four;
+                    break;  
                 case "5":
                     $rank = Rank::Five;
+                    break;
                 case "6":
                     $rank = Rank::Six;
+                    break;
                 case "7":
                     $rank = Rank::Seven;
+                    break;  
                 case "8":
                     $rank = Rank::Eight;
+                    break;
                 case "9":
                     $rank = Rank::Nine;
+                    break;
                 case "J":
                     $rank = Rank::Jack;
+                    break;
                 case "Q":
                     $rank = Rank::Queen;
+                    break;
                 case "K":
                     $rank = Rank::King;
+                    break;
                 case "A":
                     $rank = Rank::Ace;
+                    break;
                 default:
                     $rank = Rank::Unknown;
+                    break;
             }
             return new PlayingCard(suit: $suit, rank: $rank);
         } else if (strlen($json) == 3) {

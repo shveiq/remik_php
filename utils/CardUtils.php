@@ -52,7 +52,7 @@ class CardUtils {
      */
     public static function isGroup(array $cards): bool {
         $count_cards = count($cards);
-        if ($count_cards < 3 && $count_cards > 4) {
+        if ($count_cards < 3 || $count_cards > 4) {
             return false;
         }
         if ($count_cards == 3 && CardUtils::jokerCount($cards) >= 2) {
@@ -132,6 +132,7 @@ class CardUtils {
      */
     public static function sortCards(array $cards): array {
         $colors = array("S" => array(), "C" => array(), "H" => array(), "D" => array());
+        $jokerCount = CardUtils::jokerCount($cards);
         foreach ($cards as $card) {
             $colors[$card->suit->value][] = $card;
         }
@@ -153,9 +154,119 @@ class CardUtils {
         foreach($colors["S"] as $card) {
             $res[] = $card;
         }
+        for ($i=0; $i<$jokerCount; $i++) {
+            $res[] = new PlayingCard(suit: Suit::Unknown, rank: Rank::Joker);
+        }
         return $res;
     }
 
+    /**
+     * @param list<PlayingCard> $cards
+     */
+    public static function uniqueCards(array $cards): array {
+        $res = [];
+        foreach($cards as $card) {
+            $found = false;
+            foreach($res as $uniqueCard) {
+                if ($card->equals($uniqueCard)) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $res[] = $card;
+            }
+        }
+        return $res;
+    }
+
+    /**
+     * @param list<PlayingCard> $cards
+     */
+    public static function findCard(PlayingCard $targetCard, array $cards): int|false {
+        $res = false;
+        foreach($cards as $index => $card) {
+            if ($card->equals($targetCard)) {
+                $res = $index;
+                break;
+            }
+        }  
+        return $res;
+    }
+
+    /**
+     * @param list<PlayingCard> $cards
+     */
+    public static function removeAll(array $cards, array $toRemoved): array {
+        $res = array();
+        foreach ($cards as $card) {
+            $isFound = false;
+            foreach ($toRemoved as $toRemove) {
+                if ($card->equals($toRemove)) {
+                    $isFound = true;
+                    break;
+                }
+            }
+            if ($isFound == false) {
+                $res[] = $card;
+            }
+        }
+        return $res;
+    }
+
+    /**
+     * @param list<PlayingCard> $cards
+     */
+    public static function valueCards(array $cards): int {
+        $res = 0;
+        foreach($cards as $card) {
+            switch ($card->rank) {
+                case Rank::Two:
+                    $res += 2;
+                    break;
+                case Rank::Three:
+                    $res += 3;
+                    break;
+                case Rank::Four:
+                    $res += 4;
+                    break;
+                case Rank::Five:
+                    $res += 5;
+                    break;
+                case Rank::Six:
+                    $res += 6;
+                    break;
+                case Rank::Seven:
+                    $res += 7;
+                    break;      
+                case Rank::Eight:
+                    $res += 8;
+                    break;
+                case Rank::Nine:
+                    $res += 9;
+                    break;
+                case Rank::Ten:
+                    $res += 10;
+                    break;
+                case Rank::Jack:
+                    $res += 10;
+                    break;
+                case Rank::Queen:
+                    $res += 10;     
+                    break;
+                case Rank::King:
+                    $res += 10;
+                    break;
+                case Rank::Ace:
+                    $res += 11;
+                    break;                    
+                case Rank::Joker:
+                    $res += 15;
+                    break;
+            }
+        }
+        return $res;
+    }
 
     /**
      * @param list<PlayingCard> $cards
