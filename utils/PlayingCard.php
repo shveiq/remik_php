@@ -42,7 +42,7 @@ class PlayingCard {
     return $this->suit == $card->suit && $this->rank == $card->rank;
   }
 
-  public function equalsSuit(PlayingCrd $card): bool {
+  public function equalsSuit(PlayingCard $card): bool {
     return $this->suit == $card->suit;
   }
 
@@ -75,7 +75,7 @@ class PlayingCard {
                 return false;
             }
         case Suit::Spades:
-            if ($cards->suit != Suit::Spades) {
+            if ($card->suit != Suit::Spades) {
                 return true;
             } else {
                 return false;
@@ -88,7 +88,7 @@ class PlayingCard {
   public function isSuitHigher(PlayingCard $card): bool {
     switch ($this->suit) {
         case Suit::Clubs:
-            if ($cards-suit != Suit::Clubs) {
+            if ($card->suit != Suit::Clubs) {
                 return true;
             } else {
                 return false;
