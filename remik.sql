@@ -207,9 +207,10 @@ CREATE TABLE `games` (
   `table_id` INT(11) NOT NULL,
   `max_players` INT(11) NOT NULL,
   `current_player_id` int(11) NULL,
+  `next_player_time` DATETIME NULL,
   `cards` VARCHAR(400) NOT NULL DEFAULT '[]',
   `draws` VARCHAR(400) NOT NULL DEFAULT '[]',
-  `melds` VARCHAR(300) NOT NULL DEFAULT '[]',  
+  `melds` VARCHAR(400) NOT NULL DEFAULT '[]',  
   `status` VARCHAR(10) NOT NULL COMMENT 'INIT,START,SHUFFLE,LOOP,END',
   `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
   `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -218,17 +219,19 @@ CREATE TABLE `games` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE games_users (
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
   `game_id` INT(11) NOT NULL,
   `user_id` INT(11) NOT NULL,
-  `cards` VARCHAR(60) NOT NULL DEFAULT '[]',
- 
-  PRIMARY KEY (`user_id`, `game_id`),
-
+  `cards` VARCHAR(100) NOT NULL DEFAULT '[]',
+  `can_meld` tinyint(4) NOT NULL DEFAULT 0,
   CONSTRAINT `fk_games_users_user` FOREIGN KEY (`user_id`)
         REFERENCES `users`(`id`),
   CONSTRAINT `fk_games_users_game` FOREIGN KEY (`game_id`)
         REFERENCES `games`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE games_users
+ADD UNIQUE KEY unique_game_user (game_id, user_id);
 
 CREATE TABLE game_summaries (
   `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -263,5 +266,19 @@ CREATE TABLE user_achievements(
         REFERENCES `achievements`(`id`),
   CONSTRAINT `fk_user_achievements_user` FOREIGN KEY (`user_id`)
         REFERENCES `users`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `waiting_users` (
+  `id` INT(11) AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT(11) NOT NULL,
+  `table_id` INT(11) NOT NULL,
+  `game_id` INT(11) NULL,
+  `status` VARCHAR(10) NOT NULL COMMENT 'INIT, ADDED',
+  `created_date` DATETIME NOT NULL DEFAULT current_timestamp(),
+  `updated_date` DATETIME NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  CONSTRAINT `fk_waiting_users_user` FOREIGN KEY (`user_id`)
+        REFERENCES `users`(`id`),
+  CONSTRAINT `fk_waiting_users_table` FOREIGN KEY (`table_id`)
+        REFERENCES `tables`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

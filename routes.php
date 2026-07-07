@@ -5,6 +5,7 @@ use Slim\Routing\RouteCollectorProxy;
 use Psr\Log\LoggerInterface;
 
 use App\Controllers\AuthController;
+use App\Controllers\AutoController;
 //use App\Controllers\TechnicalController;
 use App\Controllers\TableController;
 use App\Controllers\GameController;
@@ -18,11 +19,16 @@ return function(App $app, LoggerInterface $logger) {
    $user = new UserController($logger);
    $table = new TableController($logger);
    $game = new GameController($logger);
+
+   $auto = new AutoController($logger);
    //$technical = new TechnicalController($logger);
 	
 //   $app->get('/technical/leagues', [$technical, 'leagues']);
 //   $app->get('/technical/users', [$technical, 'users']);
    $app->get('/auth/refresh',  [$auth, 'refreshToken']);
+
+   $app->get('/auto/game_inits', [$auto, 'initGames']);
+   $app->get('/auto/game_shuffles', [$auto, 'shuffleGames']);
    
    $app->group('', function (RouteCollectorProxy $group) use ($auth) {
       $group->post('/auth/login', [$auth, 'login']);

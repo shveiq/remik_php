@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\Game;
 use App\Models\GameUser;
 use App\Models\User;
+use App\Models\RemikTable;
+use App\Models\WaitingUser;
 
 use Psr\Log\LoggerInterface;
 use Utils\PlayingCard;
@@ -18,8 +20,7 @@ class GameController
         $this->logger = $logger;
     }
 
-
-    public function initGame($request, $response)
+    public function joinToGame($request, $response) 
     {
         $user = $request->getAttribute('user') or null;   
         if (!$user) {
@@ -39,16 +40,65 @@ class GameController
                 ->withStatus(404);  
         }
 
-        $game = new Game();
-        $game->table_id = $data['table_id'];
-        $game->max_players = 4;
-        $game->status = "INIT";
-        $game->save();
+        $table = RemikTable::find($data['table_id']);
+        if (!$table) {
+            $this->logger->error("invalid request - table_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
 
+        $waitingUser = new WaitingUser();
+        $waitingUser->user_id = $user->id;
+        $waitingUser->table_id = $table->id;
+        $waitingUser->status = 'INIT';
+        $waitingUser->save();
+    
         $response->getBody()->write(json_encode([
             "current_time" => date('Y-m-d H:i:s'),
-            "id" => $game->id, 
-            "status" => $game->status
+            "id" => $waitingUser->id, 
+            "status" => $waitingUser->status
+        ]));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+    }
+
+    public function checkJoinToGame($request, $response) 
+    {
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $this->logger->error("invalid request - invalid user");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $data = $request->getAttribute('params') or [];
+        if (!isset($data['table_id']) || !is_numeric($data['table_id'])) {
+            $this->logger->error("invalid request - without table_id");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $waitingUser = WaitingUser::find($data['waiting_id']);
+        if (!$waitingUser) {
+            $this->logger->error("invalid request - waiting_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+    
+        $response->getBody()->write(json_encode([
+            "current_time" => date('Y-m-d H:i:s'),
+            "id" => $waitingUser->id, 
+            "status" => $waitingUser->status
         ]));
 
         return $response
@@ -366,31 +416,35 @@ class GameController
                 ->withStatus(404);  
         }
 
-        if ($game->status != "SHUFFLED") {
+        if ($game->status == "SHUFFLED") {
+            $number = random_int(0, $game->max_players-1);
+            $mPlayers = $game->players()->get();
+            
+            if ($number < 0 || $number >= count($mPlayers)) {
+                $this->logger->error("invalid request - random number invalid");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            }
+            
+            $mPlayer = $mPlayers[$number];
+            $game->current_player_id = $mPlayer->id;
+            $game->next_player_time = date("Y-m-d H:i:s", time() + 45);
+            $game->status = "LOOP";
+            $game->save();
+        } else if ($game->status == "LOOP") {
+            // OK nic nie rób
+        } else {
             $this->logger->error("invalid request - game invalid state");
-            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            $response->getBody()->write(json_encode([ "error" => "invalid_state" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(404);  
         }
-
-        $number = random_int(0, $game->max_players-1);
-        $mPlayers = $game->players()->get();
-        
-        if ($number < 0 || $number >= count($mPlayers)) {
-            $this->logger->error("invalid request - random number invalid");
-            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(404);  
-        }
-        
-        $mPlayer = $mPlayers[$number];
-        $game->current_player_id = $mPlayer->id;
-        $game->status = "LOOP";
-        $game->save();
 
         $response->getBody()->write(json_encode([
+            "current_time" => date('Y-m-d H:i:s'),
             "status" => $game->status
         ]));
 
