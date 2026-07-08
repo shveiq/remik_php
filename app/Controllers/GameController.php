@@ -78,8 +78,8 @@ class GameController
         }
 
         $data = $request->getAttribute('params') or [];
-        if (!isset($data['table_id']) || !is_numeric($data['table_id'])) {
-            $this->logger->error("invalid request - without table_id");
+        if (!isset($data['waiting_id']) || !is_numeric($data['waiting_id'])) {
+            $this->logger->error("invalid request - without waiting_id");
             $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
             return $response
                 ->withHeader('Content-Type', 'application/json')
@@ -94,12 +94,21 @@ class GameController
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(404);  
         }
-    
-        $response->getBody()->write(json_encode([
-            "current_time" => date('Y-m-d H:i:s'),
-            "id" => $waitingUser->id, 
-            "status" => $waitingUser->status
-        ]));
+
+        if ($waitingUser->status == 'ADDED') {
+            $response->getBody()->write(json_encode([
+                "current_time" => date('Y-m-d H:i:s'),
+                "id" => $waitingUser->id, 
+                "game_id" => $waitingUser->game_id,
+                "status" => $waitingUser->status
+            ]));
+        } else {
+            $response->getBody()->write(json_encode([
+                "current_time" => date('Y-m-d H:i:s'),
+                "id" => $waitingUser->id, 
+                "status" => $waitingUser->status
+            ]));
+        }
 
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -113,6 +122,7 @@ class GameController
             ->withStatus(500);
     }
 
+    /*
     public function getPlayers($request, $response) 
     {
         $user = $request->getAttribute('user') or null;   
@@ -314,7 +324,7 @@ class GameController
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(201);
-    }
+    } */
 
     public function statusGame($request, $response)
     {
