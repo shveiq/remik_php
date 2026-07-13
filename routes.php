@@ -43,13 +43,17 @@ return function(App $app, LoggerInterface $logger) {
       $group->get('/user/league', [$user, 'league']);
       $group->get('/user/give_me_bonus', [$user, 'getBonus']);
       $group->get('/tables', [$table, 'getAll']);
-      $group->put('/game', [$game, 'initGame']);
+      $group->put('/joinToGame', [$game, 'joinToGame']);
+      $group->get('/joinToGame', [$game, 'checkJoinToGame']);
       $group->get('/game', [$game, 'statusGame']);
       $group->post('/game', [$game, 'startGame']);
-      $group->get('/game/players', [$game, 'getPlayers']);
-      $group->post('/game/shuffle', [$game, 'shuffleDeck']);
       $group->put('/game/next', [$game, 'nextPlayer']);
       $group->get('/game/summary', [$game, 'summaryGame']);
+      /*
+      $group->put('/game', [$game, 'initGame']);
+      $group->get('/game/players', [$game, 'getPlayers']);
+      $group->post('/game/shuffle', [$game, 'shuffleDeck']);
+      */
    })
       ->add(new AuthMiddleware($logger))
       ->add(new DeviceMiddleware($logger));

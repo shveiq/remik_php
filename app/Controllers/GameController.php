@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Models\RemikTable;
 use App\Models\WaitingUser;
 
+use DateTime;
 use Psr\Log\LoggerInterface;
 use Utils\PlayingCard;
+use Utils\CardUtils;
 
 class GameController
 {
@@ -117,9 +119,316 @@ class GameController
 
     public function nextPlayer($request, $response) 
     {
+
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $this->logger->error("invalid request - invalid user");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $data = $request->getAttribute('params') or [];
+        /* 
+        możliwe zdarzenia 1 z 4 lub wszystkie:
+
+        - undraw null/true
+        - draw null/PlayingCard
+        - card null/true
+        - meld list<PlayingCard>
+        - addToMeld int, List<PlayingCard>
+        
+        */
+        $foundElement = false;
+        if (isset($data["undraw"])) {
+            if (!is_bool($data["undraw"])) {
+                $this->logger->error("invalid request - undraw is not bool");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            } else {
+                $foundElement = true;
+            }
+        }
+        if (isset($data["draw"])) {
+            if (!is_string($data["draw"])) {
+                $this->logger->error("invalid request - draw is string");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            } else {
+                $foundElement = true;
+            }
+        }
+        if (isset($data["card"])) {
+            if (!is_bool($data["card"])) {
+                $this->logger->error("invalid request - card is not bool");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            } else {
+                $foundElement = true;
+            }
+        }
+        if (isset($data["undraw"]) && isset($data["card"])) {
+            $this->logger->error("invalid request - undraw and card cannot be in the same time");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+        if (isset($data["meld"])) {
+            if (!is_array($data["meld"])) {
+                $this->logger->error("invalid request - meld is not array");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            } else {
+                $is_correct = true;
+                foreach ($data["meld"] as $meld) {
+                    if (!CardUtils::isValidMeld($meld)) {
+                        $is_correct = false;
+                        break;
+                    }
+                }
+                if (!$is_correct) {
+                    $this->logger->error("invalid request - set of melds is not valid");
+                    $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                    return $response
+                        ->withHeader('Content-Type', 'application/json')
+                        ->withStatus(404);  
+                } else {
+                    $foundElement = true;
+                }
+            }
+        }
+        if (isset($data["add_to_meld"])) {
+            if (!is_array($data["add_to_meld"])) {
+                $this->logger->error("invalid request - add_to_meld is not hash");
+                $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(404);  
+            } else {
+                // TODO ADD VALIDATION FOR ADD_TO_MELD
+                $foundElement = true;
+            }
+        }
+        if ($foundElement == false) {
+            $this->logger->error("invalid request - none required elements in request");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }        
+        
+        if (!isset($data['game_id']) || !is_numeric($data['game_id'])) {
+            $this->logger->error("invalid request - without game_id");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $game = Game::find($data['game_id']);
+        if (!$game) {
+            $this->logger->error("invalid request - game_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        if ($game->status != 'LOOP') {
+            $this->logger->error("game is in invalid state");
+            $response->getBody()->write(json_encode([ "error" => "invalid_state" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+
+        if ($game->current_player_id != $user->id) {
+            $this->logger->error("other player is active now");
+            $response->getBody()->write(json_encode([ "error" => "invalid_player" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+
+        $nextCurrentPlayerId = -1;
+
+        $mPlayers = $game->players()->get();
+        $currentIndex = -1;
+        $players = [];
+        $pIndex = 0;
+        foreach ($mPlayers as $player) {    
+            $players[] = $player->id;
+            if ($player->id == $game->current_player_id) {
+                $currentIndex = $pIndex;
+            }
+            $pIndex++;
+        }
+        if ($currentIndex == count($players) - 1) {
+            $nextCurrentPlayerId = $players[0];
+        } else {
+            $nextCurrentPlayerId = $players[$currentIndex + 1];
+        }
+
+        $playerCards = GameUser::where('game_id', $game->id)->where('user_id', $game->current_player_id)->first();
+        if (!$playerCards) {
+            $this->logger->error("invalid request - player cards not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_player" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+
+        $response_data = array(
+            "current_time" => date('Y-m-d H:i:s') 
+        );
+
+        if ($game->next_player_time != null) {
+            //weryfikacja czy jest odpowiedni czas
+            $nextPlayerTime = new DateTime($game->next_player_time);
+            $nowTime = new DateTime();
+
+            if ($nextPlayerTime < $nowTime) {
+
+                //Wykonaj ruch automatycznie
+                // Pobierz karte
+                // Wyrzuc dowolna losowa
+                $cards = json_decode($game->cards); 
+                $draws = json_decode($game->draws);
+                $player_cards = json_decode($playerCards->cards);
+
+                $newCard = array_shift($cards);
+
+                $player_cards[] = $newCard;
+                $randIndex = array_rand($player_cards);
+                $drawCard = $player_cards[$randIndex];
+                unset($player_cards[$randIndex]);
+
+                $draws[] = $drawCard;
+
+                $game->cards = json_encode($cards);
+                $game->draws = json_encode($draws);
+
+                $playerCards->cards = json_encode($player_cards);
+                $playerCards->save();
+
+                // Koniec ruchu
+                $game->current_player_id = $nextCurrentPlayerId;
+                $nextTimeEnd = new Datetime();
+                $nextTimeEnd->modify('+40 seconds');
+                $game->next_player_time = $nextTimeEnd->format("Y-m-d H:i:s");
+                $game->save();
+
+                $response_data["card"] = $drawCard;
+                $response_data["timeout"] = "Player dont move in time";
+                $response_data["next_player"] = $nextCurrentPlayerId;
+                $response_data["next_time_player"] = $game->next_player_time;
+
+                $response->getBody()->write(json_encode($response_data));
+
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(200);  
+            }
+        }
+
+        if (isset($data["undraw"]) && $data["undraw"] == true) {
+            $cards = json_decode($game->draws); 
+            $card = array_shift($cards);
+            $game->draws = json_encode($cards);
+            $response_data["undraw"] = $card;
+
+            $player_cards = json_decode($playerCards->cards);
+            $player_cards[] = $card;
+            $playerCards->cards = json_encode($player_cards);
+            $playerCards->save();
+        }
+
+        if (isset($data["draw"]) && strlen($data["draw"])>0) {
+            $cards = json_decode($game->draws); 
+            $cards[] = $data["draw"];
+            $game->draws = json_encode($cards);
+
+            $player_cards = json_decode($playerCards->cards);
+
+            $cardIndex = array_search($data["draw"], $player_cards, true);
+            if ($cardIndex !== false) {
+                unset($player_cards[$cardIndex]);
+            }
+
+            $playerCards->cards = json_encode($player_cards);
+            $playerCards->save();
+
+            // Koniec ruchu
+            $game->current_player_id = $nextCurrentPlayerId;
+            $nextTimeEnd = new Datetime();
+            $nextTimeEnd->modify('+40 seconds');
+            $game->next_player_time = $nextTimeEnd->format("Y-m-d H:i:s");
+            $game->save();
+
+            $response_data["timeout"] = "Player moved";
+            $response_data["next_player"] = $nextCurrentPlayerId;
+            $response_data["next_time_player"] = $game->next_player_time;
+        }
+
+        if (isset($data["card"]) && $data["card"] == true) {
+            $cards = json_decode($game->cards); 
+            $card = array_shift($cards);
+            $game->cards = json_encode($cards);
+            $response_data["card"] = $card;
+
+            $player_cards = json_decode($playerCards->cards);
+            $player_cards[] = $card;
+            $playerCards->cards = json_encode($player_cards);
+            $playerCards->save();
+        }
+
+        if (isset($data["meld"])) {
+            $player_cards = json_decode($playerCards->cards);
+            $melds = json_decode($game->melds);
+            foreach($data["meld"] as $meld) {
+                if (is_array($meld)) {
+                    $found = true;
+                    foreach ($meld as $card) {
+                        $cardIndex = array_search($card, $player_cards, true);
+                        if ($cardIndex !== false) {
+                            unset($player_cards[$cardIndex]);
+                        } else {
+                            $found = false;
+                        }
+                    }
+                    if ($found) {
+                        $melds[] = $meld;
+                    }
+                }
+            }
+            $game->melds = json_encode($melds);
+
+            $playerCards->cards = json_encode($player_cards);
+            $playerCards->save();
+        }
+
+        if (isset($data["add_to_meld"])) {
+            //TODO ADD TO MEDL!
+
+        }
+
+        $game->save();
+
+        $response->getBody()->write(json_encode($response_data));
+
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(500);
+            ->withStatus(200);
     }
 
     /*
@@ -384,7 +693,9 @@ class GameController
 
         $response->getBody()->write(json_encode([
             "current_time" => date('Y-m-d H:i:s'),
+            "id" => $game->id,
             "current_player_id" => $game->current_player_id,
+            "next_player_time" => $game->next_player_time,
             "players" => $players,
             "cards" => json_decode($game->cards),
             "draws" => json_decode($game->draws),
@@ -455,6 +766,7 @@ class GameController
 
         $response->getBody()->write(json_encode([
             "current_time" => date('Y-m-d H:i:s'),
+            "id" => $game->id,
             "status" => $game->status
         ]));
 
