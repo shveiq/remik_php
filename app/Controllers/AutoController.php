@@ -8,6 +8,7 @@ use App\Models\GameUser;
 use App\Models\User;
 
 use Psr\Log\LoggerInterface;
+use Utils\CardUtils;
 use Utils\PlayingCard;
 
 class AutoController
@@ -138,8 +139,9 @@ class AutoController
 
             $i=0;
             foreach ($mPlayers as $playerCard) {
+                $sortedCards = CardUtils::sortCards($players[$i]);
                 $strCards = array();
-                foreach ($players[$i] as $card) {
+                foreach ($sortedCards as $card) {
                     $strCards[] = $card->toJSONString();
                 };
                 $playerCard->cards = json_encode($strCards);

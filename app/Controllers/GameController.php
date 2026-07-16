@@ -431,6 +431,71 @@ class GameController
             ->withStatus(200);
     }
 
+    public function sortCard($request, $response) 
+    {
+        $user = $request->getAttribute('user') or null;   
+        if (!$user) {
+            $this->logger->error("invalid request - invalid user");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $data = $request->getAttribute('params') or [];
+        if (!isset($data['game_id']) || !is_numeric($data['game_id'])) {
+            $this->logger->error("invalid request - without game_id");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        $game = Game::find($data['game_id']);
+        if (!$game) {
+            $this->logger->error("invalid request - game_id not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(404);  
+        }
+
+        if ($game->status != "LOOP") {
+            $this->logger->error("invalid request - game invalid state");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+        
+        $playerCards = GameUser::where('game_id', $game->id)->where('user_id', $user->id)->first();
+        if (!$playerCards) {
+            $this->logger->error("invalid request - player cards not in DB");
+            $response->getBody()->write(json_encode([ "error" => "invalid_player" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+
+        if (!isset($data['cards']) || !is_array($data['cards'])) {
+            $this->logger->error("invalid request - without cards");
+            $response->getBody()->write(json_encode([ "error" => "invalid_data" ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(401);  
+        }
+
+        $cards = $data["cards"];
+        $playerCards->cards = json_encode($cards);
+        $playerCards->save();
+
+        $response->getBody()->write(json_encode(array("status" => true)));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+    }
+
     /*
     public function getPlayers($request, $response) 
     {
@@ -748,7 +813,14 @@ class GameController
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus(404);  
             }
-            
+
+            $cards = json_decode($game->cards);
+            $draws = json_decode($game->draws);
+            $first = array_shift($cards);
+            $draws[] = $first;
+            $game->cards = json_encode($cards);
+            $game->draws = json_encode($draws);
+
             $mPlayer = $mPlayers[$number];
             $game->current_player_id = $mPlayer->id;
             $game->next_player_time = date("Y-m-d H:i:s", time() + 45);

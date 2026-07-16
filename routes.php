@@ -48,6 +48,7 @@ return function(App $app, LoggerInterface $logger) {
       $group->get('/game', [$game, 'statusGame']);
       $group->post('/game', [$game, 'startGame']);
       $group->put('/game/next', [$game, 'nextPlayer']);
+      $group->put('/game/sortCards', [$game, 'sortCard']);
       $group->get('/game/summary', [$game, 'summaryGame']);
       /*
       $group->put('/game', [$game, 'initGame']);
