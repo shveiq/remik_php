@@ -224,6 +224,7 @@ CREATE TABLE games_users (
   `user_id` INT(11) NOT NULL,
   `cards` VARCHAR(100) NOT NULL DEFAULT '[]',
   `can_meld` tinyint(4) NOT NULL DEFAULT 0,
+  `botStatus` VARCHAR(10) NULL,
   CONSTRAINT `fk_games_users_user` FOREIGN KEY (`user_id`)
         REFERENCES `users`(`id`),
   CONSTRAINT `fk_games_users_game` FOREIGN KEY (`game_id`)

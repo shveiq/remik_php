@@ -4,13 +4,12 @@ namespace App\Controllers;
 
 use App\Models\Game;
 use App\Models\GameUser;
-use App\Models\User;
 use App\Models\RemikTable;
 use App\Models\WaitingUser;
 
 use DateTime;
 use Psr\Log\LoggerInterface;
-use Utils\PlayingCard;
+use Utils\ArrayUtils;
 use Utils\CardUtils;
 
 class GameController
@@ -302,16 +301,17 @@ class GameController
                 //Wykonaj ruch automatycznie
                 // Pobierz karte
                 // Wyrzuc dowolna losowa
-                $cards = json_decode($game->cards); 
-                $draws = json_decode($game->draws);
-                $player_cards = json_decode($playerCards->cards);
+                $cards = json_decode($game->cards, true); 
+                $draws = json_decode($game->draws, true);
+                $player_cards = json_decode($playerCards->cards, true);
 
                 $newCard = array_shift($cards);
 
                 $player_cards[] = $newCard;
                 $randIndex = array_rand($player_cards);
                 $drawCard = $player_cards[$randIndex];
-                unset($player_cards[$randIndex]);
+
+                $player_cards = ArrayUtils::array_remove_index($player_cards, $randIndex);
 
                 $draws[] = $drawCard;
 
@@ -342,27 +342,27 @@ class GameController
         }
 
         if (isset($data["undraw"]) && $data["undraw"] == true) {
-            $cards = json_decode($game->draws); 
+            $cards = json_decode($game->draws, true); 
             $card = array_shift($cards);
             $game->draws = json_encode($cards);
             $response_data["undraw"] = $card;
 
-            $player_cards = json_decode($playerCards->cards);
+            $player_cards = json_decode($playerCards->cards, true);
             $player_cards[] = $card;
             $playerCards->cards = json_encode($player_cards);
             $playerCards->save();
         }
 
         if (isset($data["draw"]) && strlen($data["draw"])>0) {
-            $cards = json_decode($game->draws); 
+            $cards = json_decode($game->draws, true); 
             $cards[] = $data["draw"];
             $game->draws = json_encode($cards);
 
-            $player_cards = json_decode($playerCards->cards);
+            $player_cards = json_decode($playerCards->cards, true);
 
             $cardIndex = array_search($data["draw"], $player_cards, true);
             if ($cardIndex !== false) {
-                unset($player_cards[$cardIndex]);
+                $player_cards = ArrayUtils::array_remove_index($player_cards, $cardIndex);
             }
 
             $playerCards->cards = json_encode($player_cards);
@@ -381,27 +381,27 @@ class GameController
         }
 
         if (isset($data["card"]) && $data["card"] == true) {
-            $cards = json_decode($game->cards); 
+            $cards = json_decode($game->cards, true); 
             $card = array_shift($cards);
             $game->cards = json_encode($cards);
             $response_data["card"] = $card;
 
-            $player_cards = json_decode($playerCards->cards);
+            $player_cards = json_decode($playerCards->cards, true);
             $player_cards[] = $card;
             $playerCards->cards = json_encode($player_cards);
             $playerCards->save();
         }
 
         if (isset($data["meld"])) {
-            $player_cards = json_decode($playerCards->cards);
-            $melds = json_decode($game->melds);
+            $player_cards = json_decode($playerCards->cards, true);
+            $melds = json_decode($game->melds, true);
             foreach($data["meld"] as $meld) {
                 if (is_array($meld)) {
                     $found = true;
                     foreach ($meld as $card) {
                         $cardIndex = array_search($card, $player_cards, true);
                         if ($cardIndex !== false) {
-                            unset($player_cards[$cardIndex]);
+                            $player_cards = ArrayUtils::array_remove_index($player_cards, $cardIndex);
                         } else {
                             $found = false;
                         }
@@ -750,7 +750,7 @@ class GameController
         foreach ($mPlayerCards as $playerCard) {
             foreach ($players as &$player) {
                 if ($playerCard->user_id == $player['id']) {
-                    $player['cards'] = json_decode($playerCard->cards);
+                    $player['cards'] = json_decode($playerCard->cards, true);
                     break;
                 }
             }
@@ -762,9 +762,9 @@ class GameController
             "current_player_id" => $game->current_player_id,
             "next_player_time" => $game->next_player_time,
             "players" => $players,
-            "cards" => json_decode($game->cards),
-            "draws" => json_decode($game->draws),
-            "melds" => json_decode($game->melds),
+            "cards" => json_decode($game->card, true),
+            "draws" => json_decode($game->draws, true),
+            "melds" => json_decode($game->melds, true),
             "status" => $game->status
         ]));
 
@@ -814,8 +814,8 @@ class GameController
                     ->withStatus(404);  
             }
 
-            $cards = json_decode($game->cards);
-            $draws = json_decode($game->draws);
+            $cards = json_decode($game->cards, true);
+            $draws = json_decode($game->draws, true);
             $first = array_shift($cards);
             $draws[] = $first;
             $game->cards = json_encode($cards);

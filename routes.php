@@ -29,6 +29,7 @@ return function(App $app, LoggerInterface $logger) {
 
    $app->get('/auto/game_inits', [$auto, 'initGames']);
    $app->get('/auto/game_shuffles', [$auto, 'shuffleGames']);
+   $app->get('/auto/game_next_player_moves', [$auto, 'nextPlayerMoves']);
    
    $app->group('', function (RouteCollectorProxy $group) use ($auth) {
       $group->post('/auth/login', [$auth, 'login']);
